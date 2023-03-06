@@ -1,0 +1,1 @@
+a simple program which modifies korean verbs to be nouns.
