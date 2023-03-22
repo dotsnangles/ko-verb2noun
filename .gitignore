@@ -1,3 +1,4 @@
 .empty
 *.xlsx
+*.csv
 __pycache__
