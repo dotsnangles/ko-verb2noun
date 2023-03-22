@@ -1,1 +1,2 @@
-a simple program which modifies korean verbs to be nouns.
+- main_generate_ner_data.py
+- main_regularize_ce_obj.py
