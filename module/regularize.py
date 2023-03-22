@@ -94,6 +94,30 @@ def extract_keywords(sentence):
         return words_w_pos
     else:
         return words_w_pos
+    
+def join_off_syllable(test_case):
+    pattern = re.compile(r'[ㄱ-ㅎ]')
+    searched = pattern.search(test_case)
+    
+    if searched:
+        off_syllable_position, *_ = searched.span()
+        former_syllables = h2j(test_case[off_syllable_position-1])
+        if len(former_syllables) < 3:
+            off_syllable = h2j(test_case[off_syllable_position])
+            modified = former_syllables + off_syllable
+            modified = j2h(*modified)
+            result = test_case[:off_syllable_position-1] + modified + test_case[off_syllable_position+1:]
+            return result
+    else:
+        return test_case
+    
+def join_all_off_syllables(test_case):
+    while True:
+        result = join_off_syllable(test_case)
+        if test_case == result:
+            return result
+        else:
+            test_case = result
 
 def sentence_to_noun_verb(sentence):
 
@@ -110,5 +134,6 @@ def sentence_to_noun_verb(sentence):
     
     result = [[word for word, tag in word_w_pos] for word_w_pos in words_w_pos]
     result = [''.join(el) for el in result]
+    result = ' '.join(result)
     
-    return  ' '.join(result)
+    return  join_all_off_syllables(result)
