@@ -126,9 +126,9 @@ def join_all_off_syllables(test_case):          # join_off_syllable 함수를 �
 def sentence_to_noun_verb(sentence):
 
     """
-    "사다리가 쓰러져서" 문장을 "사다리가 쓰러짐" 문자열로 변환하는 함수
+    "사다리가 쓰러져서"를 "사다리가 쓰러짐"로 변환하는 함수
     extract_keywords를 통해 얻은 keywords_w_pos에 대한 표현 정규화 작업을 수행합니다.
-    리스트의 마지막 요소가 동사의 어근인 경우만 해당 작업을 수행합니다. (['VV', 'VA', 'VX'])
+    리스트의 마지막 요소가 용언의 어간인 경우에만 해당 작업을 수행합니다. (['VV', 'VA', 'VX'])
 
     """
     words_w_pos = extract_keywords(sentence)
