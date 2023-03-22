@@ -8,7 +8,7 @@ tokenizer = komoran
 
 irregular_conjugation_stems = ['걷', '긷', '깨닫', '눋', '닫', '듣', '묻', '붇', '싣', '일컫', '가깝', '가볍', '간지럽', '굽', '그립', '깁', '껄끄럽', '노엽', '더럽', '덥', '맵', '메스껍', '무겁', '반갑', '부끄럽', '사납', '서럽', '쑥스럽', '줍', '긋', '낫', '붓', '잇', '잣', '젓', '짓', ]
 
-def verb_exception_handler(verb):
+def verb_exception_handler(verb):  # 어간을 수정하기 위한 함수
     if verb == '나서':
         return '나'
     if verb == '아니하':
@@ -21,6 +21,10 @@ def verb_to_noun(verb):
     """
     한국어의 용언을 명사형으로 변환하는 함수입니다.
     용언(동사, 형용사)의 어간을 받아 명사형으로 반환합니다.
+    
+    h2j 함수는 한글 문자를 자모로 분할하고 
+    j2h 함수는 자모로 분할된 문자를 다시 한글 문자로 합성합니다.
+    예) h2j(학) > j2h(ㅎㅏㄱ) > 학 / h2j(하) + h2j(ㄱ) > j2h(ㅎㅏㄱ) > 학
         
     """
     
@@ -64,17 +68,17 @@ def extract_keywords(sentence):
     tokenizer별 형태소 분류표: https://docs.google.com/spreadsheets/d/1OGAjUvalBuX-oZvZ_-9tEfYD2gQe7hTGsgUpiiBSXI8/edit#gid=0
 
     """
-    words = sentence.split()
+    words = sentence.split()  # 띄어쓰기 단위로 형태소 분석을 수행
     
-    words_w_pos = []
+    words_w_pos = []  
     for word in words:
         pos = tokenizer.pos(word)
         pos = [[word, tag] for word, tag in pos]
         words_w_pos.append(pos)
 
-    endable_pos = ['VV', 'VA', 'VX', 'NNG', 'NNP']
-    poppable = False
-    for word_w_pos in words_w_pos:
+    endable_pos = ['VV', 'VA', 'VX', 'NNG', 'NNP']  # 용언의 어간 혹은 명사만 마지막에 위치 가능
+    poppable = False                                # 마지막에 위치시킬 어간 혹은 명사가 없는 경우 
+    for word_w_pos in words_w_pos:                  # 아래에서 수행할 형태소 제거 작업에서 모든 형태소가 제거되기 때문에 확인이 필요
         for pair in word_w_pos:
             if pair[1] in endable_pos:
                 poppable = True
@@ -82,7 +86,7 @@ def extract_keywords(sentence):
         if poppable:
             break
 
-    if poppable:
+    if poppable:  # 용언의 어간 혹은 명사가 등장할 때까지 마지막 요소를 반복해서 제거
         for idx in range(len(words_w_pos)-1, -1, -1):
             while words_w_pos[idx][-1][1] not in endable_pos:
                 words_w_pos[idx].pop(-1)
@@ -95,9 +99,9 @@ def extract_keywords(sentence):
     else:
         return words_w_pos
     
-def join_off_syllable(test_case):
-    pattern = re.compile(r'[ㄱ-ㅎ]')
-    searched = pattern.search(test_case)
+def join_off_syllable(test_case):         # 마지막 단어가 동사의 어간으로 끝나있는 경우 verb_to_noun 함수를 통해 명사형으로 변경되나
+    pattern = re.compile(r'[ㄱ-ㅎ]')      # 최종 문장의 요소 중에는 형태소 분석으로 인해 '하ㄱ'과 같은 경우가 발생해 있을 수 있음
+    searched = pattern.search(test_case)  # 해당 오류를 수정하기 위한 함수
     
     if searched:
         off_syllable_position, *_ = searched.span()
@@ -111,9 +115,9 @@ def join_off_syllable(test_case):
     else:
         return test_case
     
-def join_all_off_syllables(test_case):
-    while True:
-        result = join_off_syllable(test_case)
+def join_all_off_syllables(test_case):          # join_off_syllable 함수를 반복적으로 실행해서 
+    while True:                                 # 문장 내 존재하는 분화된 음절을 앞의 문자와 다시 합쳐줌
+        result = join_off_syllable(test_case)   # 예) 들어오ㄹ리다 부딪히ㅁ사고를 당함 > 들어올리다 부딪힘사고를 당함 
         if test_case == result:
             return result
         else:
